@@ -19,37 +19,60 @@ import {
   ExternalLink,
   Menu,
   Clock,
-  Banknote
+  Banknote,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
-import { FormEvent, useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect, useRef, useCallback } from 'react';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { projects } from './projects';
+import ProjectPage from './ProjectPage';
+import { useLanguage } from './LanguageContext';
+
+const WHATSAPP_URL = "https://wa.me/5491131486912?text=Hola!%20Me%20interesa%20cotizar%20una%20p%C3%A1gina%20web%20con%20Houston%20Express.";
 
 // Components
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { t, language, setLanguage } = useLanguage();
   
   return (
     <nav className="fixed w-full z-50 top-0 left-0 border-b border-white/5 bg-brand-bg/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-brand-blue rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-[0_0_15px_rgba(37,99,235,0.5)]">
-            H
-          </div>
-          <span className="font-heading font-bold text-xl tracking-tight">HoustonWeb</span>
+        <div className="flex items-center">
+          <img src="/logo.png" alt="Houston Express Logo" className="h-10 object-contain" />
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-brand-text-dim">
-          <a href="#services" className="hover:text-white transition-colors">Services</a>
-          <a href="#process" className="hover:text-white transition-colors">Process</a>
-          <a href="#portfolio" className="hover:text-white transition-colors">Portfolio</a>
-          <a href="#pricing" className="hover:text-white transition-colors">Pricing</a>
+          <a href="#services" className="hover:text-white transition-colors">{t('nav_services')}</a>
+          <a href="#process" className="hover:text-white transition-colors">{t('nav_process')}</a>
+          <a href="#portfolio" className="hover:text-white transition-colors">{t('nav_portfolio')}</a>
+          <a href="#pricing" className="hover:text-white transition-colors">{t('nav_pricing')}</a>
         </div>
-        <div className="hidden md:flex">
-          <motion.button 
+        <div className="hidden md:flex items-center gap-4">
+          <div className="flex bg-white/5 rounded-full p-1 border border-white/10">
+            <button 
+              onClick={() => setLanguage('es')}
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-colors ${language === 'es' ? 'bg-brand-accent text-zinc-900 font-bold' : 'text-brand-text-dim hover:text-white'}`}
+            >
+              ES
+            </button>
+            <button 
+              onClick={() => setLanguage('en')}
+              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-colors ${language === 'en' ? 'bg-brand-accent text-zinc-900 font-bold' : 'text-brand-text-dim hover:text-white'}`}
+            >
+              EN
+            </button>
+          </div>
+          <motion.a 
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-white text-zinc-900 px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-zinc-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)]"
+            className="bg-white text-zinc-900 px-5 py-2.5 rounded-full text-sm font-semibold hover:bg-zinc-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.3)] flex items-center justify-center"
           >
-            Launch Fast
-          </motion.button>
+            {t('nav_launch')}
+          </motion.a>
         </div>
         <button 
           className="md:hidden text-white p-2"
@@ -69,13 +92,35 @@ const Navbar = () => {
             className="md:hidden bg-brand-bg border-b border-white/5 overflow-hidden"
           >
             <div className="px-6 py-4 flex flex-col gap-4">
-              <a href="#services" onClick={() => setIsMobileMenuOpen(false)} className="text-brand-text-dim hover:text-white transition-colors py-2">Services</a>
-              <a href="#process" onClick={() => setIsMobileMenuOpen(false)} className="text-brand-text-dim hover:text-white transition-colors py-2">Process</a>
-              <a href="#portfolio" onClick={() => setIsMobileMenuOpen(false)} className="text-brand-text-dim hover:text-white transition-colors py-2">Portfolio</a>
-              <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-brand-text-dim hover:text-white transition-colors py-2">Pricing</a>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="bg-white w-full text-zinc-900 px-5 py-3 rounded-xl text-sm font-semibold hover:bg-zinc-200 transition-colors mt-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                Launch Fast
-              </button>
+              <a href="#services" onClick={() => setIsMobileMenuOpen(false)} className="text-brand-text-dim hover:text-white transition-colors py-2">{t('nav_services')}</a>
+              <a href="#process" onClick={() => setIsMobileMenuOpen(false)} className="text-brand-text-dim hover:text-white transition-colors py-2">{t('nav_process')}</a>
+              <a href="#portfolio" onClick={() => setIsMobileMenuOpen(false)} className="text-brand-text-dim hover:text-white transition-colors py-2">{t('nav_portfolio')}</a>
+              <a href="#pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-brand-text-dim hover:text-white transition-colors py-2">{t('nav_pricing')}</a>
+              
+              <div className="flex bg-white/5 rounded-full p-1 border border-white/10 mx-auto w-fit mt-2">
+                <button 
+                  onClick={() => setLanguage('es')}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm transition-colors ${language === 'es' ? 'bg-brand-accent text-zinc-900 font-bold' : 'text-brand-text-dim hover:text-white'}`}
+                >
+                  ES
+                </button>
+                <button 
+                  onClick={() => setLanguage('en')}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm transition-colors ${language === 'en' ? 'bg-brand-accent text-zinc-900 font-bold' : 'text-brand-text-dim hover:text-white'}`}
+                >
+                  EN
+                </button>
+              </div>
+
+              <a 
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsMobileMenuOpen(false)} 
+                className="bg-white w-full text-zinc-900 px-5 py-3 rounded-xl text-sm font-semibold hover:bg-zinc-200 transition-colors mt-2 shadow-[0_0_20px_rgba(255,255,255,0.1)] text-center block"
+              >
+                {t('nav_launch')}
+              </a>
             </div>
           </motion.div>
         )}
@@ -85,6 +130,7 @@ const Navbar = () => {
 };
 
 const Hero = () => {
+  const { t } = useLanguage();
   return (
     <section className="relative pt-40 pb-20 md:pt-52 md:pb-32 px-6 overflow-hidden">
       {/* Abstract Background Elements */}
@@ -116,26 +162,30 @@ const Hero = () => {
            transition={{ duration: 0.6 }}
         >
           <h1 className="text-5xl md:text-7xl lg:text-[100px] leading-[1.05] font-heading font-bold tracking-tight mb-8">
-            Premium websites. <br className="hidden md:block"/> Fast & Affordable.
+            {t('hero_title1')} <br className="hidden md:block"/> {t('hero_title2')}
           </h1>
           <p className="text-lg md:text-xl text-brand-text-dim max-w-2xl mx-auto mb-10 leading-relaxed">
-            Boost your digital presence in Houston with tailor-made, high-performance websites. <br className="hidden md:block" /><span className="text-white font-medium">Delivered in days for just $500.</span>
+            {t('hero_subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <motion.button 
+            <motion.a 
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="w-full sm:w-auto bg-brand-accent text-zinc-900 font-bold px-8 py-4 rounded-full hover:bg-brand-accent-hover transition-colors flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(163,230,53,0.3)]"
             >
-              Get Your Free Quote <ArrowRight className="w-4 h-4" />
-            </motion.button>
-            <motion.button 
+              {t('hero_quote_btn')} <ArrowRight className="w-4 h-4" />
+            </motion.a>
+            <motion.a 
+              href="#portfolio"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="w-full sm:w-auto bg-brand-surface text-white font-semibold px-8 py-4 rounded-full border border-white/10 hover:bg-white/10 transition-colors"
+              className="w-full sm:w-auto bg-brand-surface text-white font-semibold px-8 py-4 rounded-full border border-white/10 hover:bg-white/10 transition-colors flex items-center justify-center"
             >
-              View Portfolio
-            </motion.button>
+              {t('hero_portfolio_btn')}
+            </motion.a>
           </div>
           
           <motion.div 
@@ -161,8 +211,8 @@ const Hero = () => {
                   ))}
                 </div>
                 <p className="text-sm text-brand-text-dim leading-tight">
-                  <strong className="text-white font-semibold">+500</strong> corporate sites globally<br/>
-                  <span className="text-xs">5.0 rating on Google Reviews</span>
+                  <strong className="text-white font-semibold">{t('hero_stats_sites').split(' ')[0]}</strong> {t('hero_stats_sites').substring(t('hero_stats_sites').indexOf(' ') + 1)}<br/>
+                  <span className="text-xs">{t('hero_stats_rating')}</span>
                 </p>
               </div>
             </div>
@@ -323,196 +373,172 @@ const BentoFeatures = () => {
   );
 };
 
-const projects = [
-  {
-    id: 1,
-    title: "Houston Energy Dash",
-    category: "Enterprise Web App",
-    imageSize: "711 × 400",
-    caseStudy: "We partnered with a top energy provider in Houston to rebuild their legacy internal dashboard. The new platform consolidates live analytics and fleet tracking into one highly responsive interface, saving their dispatch team 15+ hours weekly.",
-    technologies: ["React", "TypeScript", "Tailwind CSS", "Recharts"],
-    testimonial: {
-      text: "HoustonWeb understood our complex data needs immediately. The resulting UI is both gorgeous and incredibly functional.",
-      author: "Marcus Vance, Director of Operations"
-    },
-    colSpan: "md:col-span-7",
-    gradient: "from-brand-blue/20 to-transparent",
-    hoverBorder: "group-hover:border-brand-blue/40"
-  },
-  {
-    id: 2,
-    title: "Velocity Real Estate",
-    category: "Corporate Website",
-    imageSize: "400 × 400",
-    caseStudy: "A premium digital storefront for luxury properties in Texas. We focused on high-performance image loading, refined typography, and seamless property search capabilities.",
-    technologies: ["Next.js", "Framer Motion", "Mapbox", "Sanity CMS"],
-    testimonial: {
-       text: "HoustonWeb has transformed the way our team works. Deliveries are a breeze; making motion more efficient, while staying on brand.",
-       author: "Alicia Curtis, Lead Broker"
-    },
-    colSpan: "md:col-span-5",
-    gradient: "from-brand-accent/20 to-transparent",
-    hoverBorder: "group-hover:border-brand-accent/40"
-  }
-];
-
 const Portfolio = () => {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const selectedProject = projects.find(p => p.id === selectedId);
+  const navigate = useNavigate();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
-  // Effect to lock body scroll when modal is open
+  const updateScrollButtons = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 10);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 10);
+
+    // Determine active slide
+    const slideWidth = el.clientWidth * 0.82; // approx width of each snap item
+    const idx = Math.round(el.scrollLeft / slideWidth);
+    setActiveIdx(Math.min(idx, projects.length - 1));
+  }, []);
+
   useEffect(() => {
-    if (selectedId) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [selectedId]);
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', updateScrollButtons, { passive: true });
+    updateScrollButtons();
+    return () => el.removeEventListener('scroll', updateScrollButtons);
+  }, [updateScrollButtons]);
+
+  const scroll = (dir: 'left' | 'right') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const slideWidth = el.clientWidth * 0.82;
+    el.scrollBy({ left: dir === 'left' ? -slideWidth : slideWidth, behavior: 'smooth' });
+  };
 
   return (
-    <section id="portfolio" className="py-24 px-6 border-t border-white/5 relative">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-brand-accent text-sm font-bold tracking-widest uppercase mb-4">GALLERY</h2>
-          <h3 className="text-4xl md:text-5xl font-heading font-bold mb-8">Made with HoustonWeb</h3>
-        </div>
-
-        <div className="grid md:grid-cols-12 gap-4 h-[600px] mt-12">
-          <motion.div 
-            onClick={() => setSelectedId(1)}
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className={`md:col-span-7 bg-brand-surface rounded-2xl border border-white/5 overflow-hidden group relative flex-col flex items-center justify-center cursor-pointer transition-colors ${projects[0].hoverBorder}`}
-          >
-            <div className={`absolute inset-0 bg-gradient-to-tr ${projects[0].gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none`} />
-            <div className="absolute inset-4 bg-[#0a0b0e] rounded-xl flex items-center justify-center group-hover:bg-[#111318] transition-colors">
-               <div className="text-6xl font-heading font-bold text-white/5 group-hover:text-white/10 transition-colors">{projects[0].imageSize}</div>
-               <div className="absolute bottom-8 left-8 text-left opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                 <p className="text-brand-blue text-sm font-bold mb-1 uppercase tracking-wider">{projects[0].category}</p>
-                 <p className="text-2xl font-heading font-bold text-white">{projects[0].title}</p>
-               </div>
-            </div>
-          </motion.div>
-          
-          <div className="md:col-span-5 flex flex-col gap-4">
-            <motion.div 
-               onClick={() => setSelectedId(2)}
-               initial={{ opacity: 0, x: 20 }}
-               whileInView={{ opacity: 1, x: 0 }}
-               viewport={{ once: true }}
-               transition={{ delay: 0.1 }}
-              className={`flex-1 bg-brand-surface rounded-2xl border border-white/5 overflow-hidden group relative p-4 flex items-center justify-center cursor-pointer transition-colors ${projects[1].hoverBorder}`}
-            >
-               <div className={`absolute inset-0 bg-gradient-to-tr ${projects[1].gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-10 pointer-events-none`} />
-               <div className="w-full h-full bg-[#0a0b0e] rounded-xl flex items-center justify-center group-hover:bg-[#111318] transition-colors relative overflow-hidden">
-                 <div className="text-4xl font-heading font-bold text-white/5 group-hover:text-white/10 transition-colors">{projects[1].imageSize}</div>
-                 <div className="absolute bottom-8 left-8 text-left opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-                   <p className="text-brand-accent text-sm font-bold mb-1 uppercase tracking-wider">{projects[1].category}</p>
-                   <p className="text-xl font-heading font-bold text-white">{projects[1].title}</p>
-                 </div>
-               </div>
-            </motion.div>
-            
-            <motion.div 
-               initial={{ opacity: 0, x: 20 }}
-               whileInView={{ opacity: 1, x: 0 }}
-               viewport={{ once: true }}
-               transition={{ delay: 0.2 }}
-              className="flex-1 bg-[#4f46e5]/10 rounded-2xl border border-[#4f46e5]/20 overflow-hidden relative p-8 flex flex-col justify-center"
-            >
-               <p className="text-xl md:text-2xl font-heading text-white/90 leading-tight mb-4">
-                  "{projects[1].testimonial.text}"
-               </p>
-               <div>
-                 <p className="font-semibold text-sm">{projects[1].testimonial.author}</p>
-               </div>
-            </motion.div>
-          </div>
-        </div>
+    <section id="portfolio" className="py-24 border-t border-white/5 relative overflow-hidden">
+      {/* Header */}
+      <div className="max-w-6xl mx-auto px-6 text-center mb-12">
+        <motion.h2 
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-brand-accent text-sm font-bold tracking-widest uppercase mb-4"
+        >
+          PORTFOLIO
+        </motion.h2>
+        <motion.h3 
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1 }}
+          className="text-4xl md:text-5xl font-heading font-bold"
+        >
+          Made with Houston Express
+        </motion.h3>
       </div>
 
-      <AnimatePresence>
-        {selectedProject && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSelectedId(null)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100]"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-4xl bg-brand-surface border border-white/10 rounded-3xl z-[101] overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
+      {/* Slider */}
+      <div className="relative group/slider">
+        {/* Navigation Arrows */}
+        <AnimatePresence>
+          {canScrollLeft && (
+            <motion.button
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              onClick={() => scroll('left')}
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-30 w-14 h-14 rounded-full bg-brand-bg/90 border border-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-brand-surface hover:border-white/30 transition-all shadow-2xl cursor-pointer"
             >
-              <div className="flex justify-between items-center p-6 border-b border-white/5 bg-brand-bg/50">
-                <div>
-                  <p className="text-brand-accent text-sm font-bold mb-1 uppercase tracking-wider">{selectedProject.category}</p>
-                  <h3 className="text-2xl font-heading font-bold">{selectedProject.title}</h3>
-                </div>
-                <button 
-                  onClick={() => setSelectedId(null)}
-                  className="p-2 hover:bg-white/10 rounded-full transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              
-              <div className="p-6 md:p-8 overflow-y-auto">
-                <div className="aspect-video w-full bg-brand-bg rounded-xl mb-8 flex items-center justify-center border border-white/5 relative overflow-hidden">
-                   <div className="text-5xl font-heading font-bold text-white/5">{selectedProject.imageSize} View</div>
-                   <div className={`absolute inset-0 bg-gradient-to-tr ${selectedProject.gradient} opacity-50`} />
-                </div>
+              <ChevronLeft className="w-6 h-6" />
+            </motion.button>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {canScrollRight && (
+            <motion.button
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              onClick={() => scroll('right')}
+              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-30 w-14 h-14 rounded-full bg-brand-bg/90 border border-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-brand-surface hover:border-white/30 transition-all shadow-2xl cursor-pointer"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* Scroll Container */}
+        <div
+          ref={scrollRef}
+          className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide px-6 md:px-[9%]"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {projects.map((project, i) => (
+            <motion.div
+              key={project.slug}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08 }}
+              className="snap-center flex-shrink-0 group cursor-pointer"
+              style={{ width: '80vw', maxWidth: '1100px' }}
+              onClick={() => navigate(`/proyecto/${project.slug}`)}
+            >
+              {/* Image Container */}
+              <div
+                className="relative rounded-2xl overflow-hidden border border-white/5 group-hover:border-white/20 transition-all duration-500 shadow-2xl shadow-black/40"
+                style={{ height: '60vh', minHeight: '400px', maxHeight: '700px' }}
+              >
+                <img
+                  src={project.image}
+                  alt={project.title}
+                  className="w-full h-full object-cover object-top transition-transform duration-700 group-hover:scale-[1.03]"
+                  loading="lazy"
+                />
+                {/* Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
                 
-                <div className="grid md:grid-cols-3 gap-8">
-                  <div className="md:col-span-2 space-y-6">
-                    <div>
-                      <h4 className="text-xl font-bold mb-3 flex items-center gap-2">
-                         <Layout className="w-5 h-5 text-brand-blue" /> The Challenge & Solution
-                      </h4>
-                      <p className="text-brand-text-dim leading-relaxed tracking-wide">
-                        {selectedProject.caseStudy}
-                      </p>
-                    </div>
-                    <div className="p-6 bg-brand-bg/50 rounded-2xl border border-white/5 relative overflow-hidden">
-                       <div className="absolute top-0 right-0 p-4 opacity-5">
-                          <Star className="w-24 h-24" />
-                       </div>
-                       <h4 className="text-lg font-bold mb-3 flex items-center gap-2 text-white">
-                          Client Testimonial
-                       </h4>
-                       <p className="text-brand-text-dim italic mb-4">"{selectedProject.testimonial.text}"</p>
-                       <p className="text-sm font-bold text-brand-accent">— {selectedProject.testimonial.author}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-6 flex flex-col">
-                    <div>
-                      <h4 className="text-lg font-bold mb-4 font-heading border-b border-white/5 pb-2">Technologies Used</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedProject.technologies.map(tech => (
-                          <span key={tech} className="px-3 py-1.5 bg-brand-bg border border-white/5 rounded-lg text-sm text-brand-text-dim font-medium">
-                            {tech}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="mt-auto pt-6">
-                       <button className="w-full py-4 rounded-xl bg-brand-blue hover:bg-brand-blue-hover text-white font-bold transition-colors flex items-center justify-center gap-2">
-                          Visit Live Site <ExternalLink className="w-4 h-4" />
-                       </button>
-                    </div>
+                {/* Bottom Info */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8 z-10">
+                  <span className="inline-block px-3 py-1 rounded-full bg-brand-blue/20 text-brand-blue text-xs font-bold uppercase tracking-wider mb-3 border border-brand-blue/30 backdrop-blur-sm">
+                    {project.category}
+                  </span>
+                  <h4 className="text-2xl md:text-3xl font-heading font-bold text-white mb-2">
+                    {project.title}
+                  </h4>
+                  <div className="flex items-center gap-3 mt-3">
+                    <span className="text-sm text-white/70 font-medium flex items-center gap-1.5 group-hover:text-brand-accent transition-colors">
+                      View project <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                    <a
+                      href={project.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-sm text-white/50 hover:text-white flex items-center gap-1.5 transition-colors ml-auto"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" /> Live site
+                    </a>
                   </div>
                 </div>
               </div>
             </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+          ))}
+        </div>
+
+        {/* Dot Indicators */}
+        <div className="flex items-center justify-center gap-2 mt-8">
+          {projects.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => {
+                const el = scrollRef.current;
+                if (!el) return;
+                const slideWidth = el.clientWidth * 0.82;
+                el.scrollTo({ left: slideWidth * i, behavior: 'smooth' });
+              }}
+              className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                i === activeIdx
+                  ? 'w-8 bg-brand-accent'
+                  : 'w-2 bg-white/20 hover:bg-white/40'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
     </section>
   );
 };
@@ -555,13 +581,16 @@ const Pricing = () => (
             <span className="text-brand-text-dim text-xl">Setup</span>
           </motion.div>
 
-          <motion.button 
+          <motion.a 
+            href={WHATSAPP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="w-full sm:w-auto bg-brand-accent text-zinc-900 font-bold px-8 py-4 rounded-full hover:bg-brand-accent-hover transition-colors text-lg shadow-[0_0_30px_rgba(163,230,53,0.3)]"
+            className="w-full sm:w-auto bg-brand-accent text-zinc-900 font-bold px-8 py-4 rounded-full hover:bg-brand-accent-hover transition-colors text-lg shadow-[0_0_30px_rgba(163,230,53,0.3)] flex items-center justify-center"
           >
             Claim Your Discount
-          </motion.button>
+          </motion.a>
           <p className="text-sm text-brand-text-dim mt-4">
             * $20/month maintenance fee applies after first month
           </p>
@@ -602,6 +631,14 @@ const Contact = () => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const name = formData.get('name') as string;
+    const business = formData.get('business') as string;
+    const email = formData.get('email') as string;
+    const help = formData.get('help') as string;
+
+    const messageText = `Hola! Me interesa cotizar una página web.%0A%0A*Nombre:* ${encodeURIComponent(name)}%0A*Empresa:* ${encodeURIComponent(business)}%0A*Email:* ${encodeURIComponent(email)}%0A*Mensaje:* ${encodeURIComponent(help)}`;
+    window.open(`https://wa.me/5491131486912?text=${messageText}`, '_blank');
     setStatus('submitted');
   };
 
@@ -643,20 +680,20 @@ const Contact = () => {
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-brand-text-dim mb-2 ml-1">Full Name</label>
-                <input required type="text" className="w-full bg-brand-bg border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all" placeholder="John Doe" />
+                <input required name="name" type="text" className="w-full bg-brand-bg border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all" placeholder="John Doe" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-brand-text-dim mb-2 ml-1">Business Name</label>
-                <input required type="text" className="w-full bg-brand-bg border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all" placeholder="Acme Corp" />
+                <input required name="business" type="text" className="w-full bg-brand-bg border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all" placeholder="Acme Corp" />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-brand-text-dim mb-2 ml-1">Email Address</label>
-              <input required type="email" className="w-full bg-brand-bg border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all" placeholder="john@example.com" />
+              <input required name="email" type="email" className="w-full bg-brand-bg border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all" placeholder="john@example.com" />
             </div>
             <div>
               <label className="block text-sm font-medium text-brand-text-dim mb-2 ml-1">How can we help you?</label>
-              <textarea required rows={4} className="w-full bg-brand-bg border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all resize-none" placeholder="Tell us about your project goals..." />
+              <textarea required name="help" rows={4} className="w-full bg-brand-bg border border-white/5 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue transition-all resize-none" placeholder="Tell us about your project goals..." />
             </div>
             <motion.button 
               whileHover={{ scale: 1.02 }}
@@ -676,11 +713,8 @@ const Contact = () => {
 const Footer = () => (
   <footer className="py-12 px-6 bg-[#0a0b0e]">
     <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-brand-blue rounded-xl flex items-center justify-center text-white font-bold text-xl">
-          H
-        </div>
-        <span className="font-heading font-bold text-lg tracking-tight">HoustonWeb</span>
+      <div className="flex items-center">
+        <img src="/logo.png" alt="Houston Express Logo" className="h-12 object-contain" />
       </div>
       <div className="text-sm text-brand-text-dim">
         © {new Date().getFullYear()} Houston Professional Web Agency. All rights reserved.
@@ -689,7 +723,7 @@ const Footer = () => (
   </footer>
 );
 
-export default function App() {
+function HomePage() {
   return (
     <div className="min-h-screen font-sans selection:bg-brand-blue/30 selection:text-brand-blue">
       <Navbar />
@@ -702,5 +736,14 @@ export default function App() {
       <Contact />
       <Footer />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/proyecto/:slug" element={<ProjectPage />} />
+    </Routes>
   );
 }
