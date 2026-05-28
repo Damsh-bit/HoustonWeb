@@ -543,88 +543,158 @@ const Portfolio = () => {
   );
 };
 
-const Pricing = () => (
-  <section id="pricing" className="py-24 px-6 bg-brand-blue relative overflow-hidden">
-    {/* Decorative blur */}
-    <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-white/10 blur-[120px] rounded-full pointer-events-none" />
-    
-    <div className="max-w-5xl mx-auto">
-      <motion.div 
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="bg-brand-bg rounded-[32px] p-8 md:p-12 lg:p-16 border border-white/10 shadow-2xl relative z-10 flex flex-col md:flex-row gap-12 items-center hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-shadow duration-500"
+const PricingCard = ({ name, price, description, features, isPopular = false, delay = 0 }: any) => {
+  const { t } = useLanguage();
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay }}
+      className={`flex flex-col h-full rounded-[24px] border transition-all duration-500 ${
+        isPopular
+          ? 'bg-brand-surface border-brand-accent shadow-[0_20px_50px_rgba(255,184,77,0.2)] scale-105 md:scale-100'
+          : 'bg-brand-surface border-white/10 hover:border-white/20 hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]'
+      } p-8 md:p-10`}
+    >
+      {isPopular && (
+        <div className="mb-4 inline-block px-3 py-1 rounded-full bg-brand-accent/10 text-brand-accent font-bold text-xs border border-brand-accent/20 w-fit">
+          Popular
+        </div>
+      )}
+      
+      <h3 className="text-2xl font-bold mb-2">{name}</h3>
+      <p className="text-brand-text-dim text-sm mb-6">{description}</p>
+      
+      <div className="flex items-baseline gap-1 mb-8">
+        <span className="text-4xl font-heading font-bold">{price}</span>
+      </div>
+
+      <motion.a
+        href={WHATSAPP_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className={`w-full py-3 px-6 rounded-full font-semibold text-center transition-colors mb-8 flex items-center justify-center ${
+          isPopular
+            ? 'bg-brand-accent text-zinc-900 hover:bg-brand-accent-hover shadow-[0_0_30px_rgba(255,184,77,0.3)]'
+            : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+        }`}
       >
-        
-        <div className="flex-1">
-          <motion.div 
-            initial={{ scale: 0.9, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            viewport={{ once: true }}
-            className="inline-block px-4 py-1.5 rounded-full bg-brand-blue/10 text-brand-blue font-bold text-sm mb-6 border border-brand-blue/20"
-          >
-            Houston Special
-          </motion.div>
-          <h3 className="text-4xl lg:text-5xl font-heading font-bold mb-4">The Corporate Plan</h3>
-          <p className="text-brand-text-dim text-lg mb-8 max-w-sm">Everything you need to jumpstart your local digital presence rapidly.</p>
-          
-          <motion.div 
-            initial={{ scale: 0.8, opacity: 0 }}
-            whileInView={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.3, type: "spring" }}
-            viewport={{ once: true }}
-            className="flex items-baseline gap-2 mb-8"
-          >
-            <span className="text-6xl font-heading font-bold text-white">$500</span>
-            <span className="text-brand-text-dim text-xl">Setup</span>
-          </motion.div>
+        {t('pricing_cta')}
+      </motion.a>
 
-          <motion.a 
-            href={WHATSAPP_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="w-full sm:w-auto bg-brand-accent text-zinc-900 font-bold px-8 py-4 rounded-full hover:bg-brand-accent-hover transition-colors text-lg shadow-[0_0_30px_rgba(163,230,53,0.3)] flex items-center justify-center"
-          >
-            Claim Your Discount
-          </motion.a>
-          <p className="text-sm text-brand-text-dim mt-4">
-            * $20/month maintenance fee applies after first month
-          </p>
+      <div className="space-y-4 flex-1">
+        {features.map((feature: string, idx: number) => (
+          <div key={idx} className="flex items-start gap-3">
+            <CheckCircle2 className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isPopular ? 'text-brand-accent' : 'text-brand-blue'}`} />
+            <span className="text-sm">{feature}</span>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+};
+
+const Pricing = () => {
+  const { t } = useLanguage();
+  
+  const plans = [
+    {
+      name: t('pricing_express_name'),
+      price: t('pricing_express_price'),
+      description: t('pricing_express_desc'),
+      features: [
+        t('pricing_express_feature1'),
+        t('pricing_express_feature2'),
+        t('pricing_express_feature3'),
+        t('pricing_express_feature4'),
+        t('pricing_express_feature5'),
+        t('pricing_express_feature6'),
+      ],
+      isPopular: false,
+    },
+    {
+      name: t('pricing_advanced_name'),
+      price: t('pricing_advanced_price'),
+      description: t('pricing_advanced_desc'),
+      features: [
+        t('pricing_advanced_feature1'),
+        t('pricing_advanced_feature2'),
+        t('pricing_advanced_feature3'),
+        t('pricing_advanced_feature4'),
+        t('pricing_advanced_feature5'),
+        t('pricing_advanced_feature6'),
+        t('pricing_advanced_feature7'),
+        t('pricing_advanced_feature8'),
+      ],
+      isPopular: true,
+    },
+    {
+      name: t('pricing_pro_name'),
+      price: t('pricing_pro_price'),
+      description: t('pricing_pro_desc'),
+      features: [
+        t('pricing_pro_feature1'),
+        t('pricing_pro_feature2'),
+        t('pricing_pro_feature3'),
+        t('pricing_pro_feature4'),
+        t('pricing_pro_feature5'),
+        t('pricing_pro_feature6'),
+        t('pricing_pro_feature7'),
+        t('pricing_pro_feature8'),
+        t('pricing_pro_feature9'),
+      ],
+      isPopular: false,
+    },
+  ];
+
+  return (
+    <section id="pricing" className="py-24 px-6 bg-brand-bg relative overflow-hidden">
+      {/* Decorative blur */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-blue/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-accent/5 blur-[120px] rounded-full pointer-events-none" />
+      
+      <div className="max-w-7xl mx-auto relative z-10">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <div className="inline-block px-4 py-1.5 rounded-full bg-brand-blue/10 text-brand-blue font-bold text-sm mb-6 border border-brand-blue/20">
+            {t('pricing_tag')}
+          </div>
+          <h2 className="text-4xl md:text-5xl font-heading font-bold mb-4">{t('pricing_title')}</h2>
+          <p className="text-brand-text-dim text-lg max-w-2xl mx-auto">{t('pricing_subtitle')}</p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-3 gap-8 mb-8">
+          {plans.map((plan, idx) => (
+            <PricingCard
+              key={idx}
+              {...plan}
+              delay={idx * 0.1}
+            />
+          ))}
         </div>
 
-        <div className="flex-1 w-full bg-brand-surface rounded-3xl p-8 lg:p-10 border border-white/5">
-          <ul className="space-y-6">
-            <li className="flex items-center gap-4 text-lg">
-              <CheckCircle2 className="w-6 h-6 text-brand-blue flex-shrink-0" />
-              <span>Custom .com Domain Included</span>
-            </li>
-             <li className="flex items-center gap-4 text-lg">
-              <CheckCircle2 className="w-6 h-6 text-brand-blue flex-shrink-0" />
-              <span>Ultra-Fast SSD Hosting</span>
-            </li>
-             <li className="flex items-center gap-4 text-lg">
-              <CheckCircle2 className="w-6 h-6 text-brand-blue flex-shrink-0" />
-              <span>SSL Security Certificate</span>
-            </li>
-             <li className="flex items-center gap-4 text-lg">
-              <CheckCircle2 className="w-6 h-6 text-brand-blue flex-shrink-0" />
-              <span>WhatsApp & Social Integration</span>
-            </li>
-             <li className="flex items-center gap-4 tracking-tight opacity-50 text-lg border-t border-white/5 pt-4 mt-2">
-              <Zap className="w-5 h-5 flex-shrink-0" />
-              <span>SEO Optimized Foundation</span>
-            </li>
-          </ul>
-        </div>
-        
-      </motion.div>
-    </div>
-  </section>
-);
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5 }}
+          className="text-center text-sm text-brand-text-dim"
+        >
+          {t('pricing_maintenance')}
+        </motion.p>
+      </div>
+    </section>
+  );
+};
 
 const Contact = () => {
   const [status, setStatus] = useState<'idle' | 'submitted'>('idle');
